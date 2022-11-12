@@ -30,4 +30,18 @@ func New(
 
 // Action returns an action from the given observation
 func (agent *Agent) Action(observation interface{}) interface{} {
-	// Set the parameters of the network from the list of par
+	// Set the parameters of the network from the list of parameters
+	// and propagate signals
+	obs, _ := observation.([]float64)
+	input := anydiff.NewConst(
+		anyvec64.MakeVectorData(anyvec64.MakeNumericList(obs)))
+	output := agent.Net.Apply(input, 1).Output()
+	res, _ := output.Data().([]float64)
+	var ret int
+	if res[0] > 0 {
+		ret = 1
+	} else {
+		ret = 0
+	}
+	return ret
+}
