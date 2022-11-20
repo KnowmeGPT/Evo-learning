@@ -110,4 +110,28 @@ func main() {
 	// Rollout episodes
 	wg := new(sync.WaitGroup)
 	var averageEpochs []float64
-	for 
+	for episode := 0; episode < episodeLimit; episode++ {
+		fmt.Printf("\rEPISODE %d out of %d\n", episode, episodeLimit)
+		fmt.Printf("\rAGENTS %d\n", len(agents))
+
+		// Accumulate results
+		var allRewards [][2]float64
+		var allEpochs [][2]int
+
+		// Share parameters to all agents and compute independently on buffered
+		// channels
+		rewards := make(chan [2]float64, len(agents))
+		epochs := make(chan [2]int, len(agents))
+		noiseVectors := make(chan anyvec.Vector, len(agents))
+
+		for _, worker := range agents {
+			wg.Add(1)
+			go func(
+				wg *sync.WaitGroup, worker *agent.Agent, params []anyvec.Vector) {
+				defer wg.Done()
+				// Make random perturbations
+				posParams := make([]anyvec.Vector, len(params))
+				negParams := make([]anyvec.Vector, len(params))
+				noiseIndex := noiseTable.SampleIndex(worker.R, paramsDimensions)
+				noiseVector := noiseTable.Chunk(noiseIndex, paramsDimensions)
+				noiseVector.Scale(anyvec6
