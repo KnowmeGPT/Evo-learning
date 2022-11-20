@@ -46,3 +46,19 @@ func setNetParams(net anynet.Net, params []anyvec.Vector) {
 		param.Vector.Set(params[i])
 	}
 }
+
+func main() {
+	var baseURL, environment, monPath string
+	var renderAgent, renderFinal bool
+	var numAgents, globalStepLimit, episodeLimit, testRuns int
+	var globalSeed int64
+	var noiseStdDeviation, l2Coefficient, stepSize,
+	 	beta1, beta2, epsilon, cutoffEpoch float64
+
+	flag.StringVar(&baseURL, "url", "http://localhost:5000", "openai/gym-http-api url")
+	flag.StringVar(&environment, "env", "CartPole-v0", "openai/gym environment")
+	flag.StringVar(&monPath, "outmonitor", "", "path to save openai/gym environment monitor")
+	flag.BoolVar(&renderAgent, "renderagent", false, "render openai/gym environment for agents (not recommended)")
+	flag.BoolVar(&renderFinal, "renderfinal", false, "render openai/gym environment final test (recommended)")
+	flag.IntVar(&numAgents, "agents", 2, "number of agents")
+	flag.Int64Var(&globalSeed, "seed", 0, "random seed")
