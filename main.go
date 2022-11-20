@@ -75,4 +75,39 @@ func main() {
 	flag.Parse()
 
 	// Global seeder for initialization
-	seeder := rand.New(rand.NewSource(globalSee
+	seeder := rand.New(rand.NewSource(globalSeed))
+
+	// Create the global policy
+	p := policy.New(globalStepLimit)
+
+	// Get the initial parameters of the network
+	var paramsDimensions int
+	parameters := net.Parameters()
+	params := make([]anyvec.Vector, len(parameters))
+	for i, param := range parameters {
+		params[i] = param.Vector
+		paramsDimensions += params[i].Len()
+	}
+
+	// Create the optimizer
+	optimizer := opt.NewAdam(params, stepSize, beta1, beta2, epsilon)
+
+	// Create the noise table
+	noiseTable := noise.New(seeder.Int63(), numAgents*paramsDimensions)
+
+	// Create agents
+	agents := make([]*agent.Agent, numAgents)
+	for i := range agents {
+		client, id, err := env.New(baseURL, environment)
+		if err != nil {
+			panic(err)
+		}
+
+		agents[i] = agent.New(
+			client, id, newNet(), rand.New(rand.NewSource(seeder.Int63())))
+	}
+
+	// Rollout episodes
+	wg := new(sync.WaitGroup)
+	var averageEpochs []float64
+	for 
