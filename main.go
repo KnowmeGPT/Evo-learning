@@ -62,3 +62,17 @@ func main() {
 	flag.BoolVar(&renderFinal, "renderfinal", false, "render openai/gym environment final test (recommended)")
 	flag.IntVar(&numAgents, "agents", 2, "number of agents")
 	flag.Int64Var(&globalSeed, "seed", 0, "random seed")
+	flag.IntVar(&globalStepLimit, "steplimit", 100000, "openai/gym environment step limit")
+	flag.IntVar(&episodeLimit, "episodes", 100, "number of episodes to run")
+	flag.IntVar(&testRuns, "finalepisodes", 5, "number of episodes to run after training")
+	flag.Float64Var(&cutoffEpoch, "cutoff", 180.0, "average agent cutoff training")
+	flag.Float64Var(&noiseStdDeviation, "std", 0.02, "noise standard deviation")
+	flag.Float64Var(&l2Coefficient, "l2", 0.005, "l2 regularization coefficient")
+	flag.Float64Var(&stepSize, "stepsize", 0.01, "optimizer stepsize")
+	flag.Float64Var(&beta1, "beta1", 0.9, "optimizer beta1 (adam)")
+	flag.Float64Var(&beta2, "beta2", 0.999, "optimizer beta2 (adam)")
+	flag.Float64Var(&epsilon, "epsilon", 1e-8, "optimizer epsilon (adam)")
+	flag.Parse()
+
+	// Global seeder for initialization
+	seeder := rand.New(rand.NewSource(globalSee
