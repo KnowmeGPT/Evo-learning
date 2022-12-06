@@ -162,4 +162,34 @@ func main() {
 		close(rewards)
 		close(epochs)
 
-		// Calculate mild-stati
+		// Calculate mild-statistics
+		sumEpochs := 0
+		for epoch := range epochs {
+			for i := range epoch {
+				sumEpochs += epoch[i]
+			}
+			allEpochs = append(allEpochs, epoch)
+		}
+		averageEpoch := float64(sumEpochs) / float64(len(allEpochs)*2)
+		fmt.Printf("\rAVERAGE EPOCH %.2f\033[F\033[F", averageEpoch)
+		averageEpochs = append(averageEpochs, averageEpoch)
+
+		// Noise
+		v := 0
+		contiguousNoise := make([]float64, len(agents)*paramsDimensions)
+		for noiseVector := range noiseVectors {
+			for _, element := range noiseVector.Data().([]float64) {
+				contiguousNoise[v] = element
+				v++
+			}
+		}
+
+		// Compute ranks
+		for reward := range rewards {
+			allRewards = append(allRewards, reward)
+		}
+		rankedRewards := util.ComputeCenteredRank(allRewards)
+
+		// Get the reward differences
+		rewardResults := make([]float64, len(rankedRewards))
+		for i := range rankedRe
