@@ -134,4 +134,32 @@ func main() {
 				negParams := make([]anyvec.Vector, len(params))
 				noiseIndex := noiseTable.SampleIndex(worker.R, paramsDimensions)
 				noiseVector := noiseTable.Chunk(noiseIndex, paramsDimensions)
-				noiseVector.Scale(anyvec6
+				noiseVector.Scale(anyvec64.MakeNumeric(noiseStdDeviation))
+
+				for i := range params {
+					posParams[i] = params[i].Copy()
+					posParams[i].Add(noiseVector)
+					negParams[i] = params[i].Copy()
+					negParams[i].Sub(noiseVector)
+				}
+
+				// Rollout with the new params
+				setNetParams(worker.Net, posParams)
+				posRewards, posEpochs := p.Rollout(worker, renderAgent)
+				setNetParams(worker.Net, negParams)
+				negRewards, negEpochs := p.Rollout(worker, renderAgent)
+				posSum, _ := anyvec.Sum(posRewards).(float64)
+				negSum, _ := anyvec.Sum(negRewards).(float64)
+
+				// Send index, rewards, and epochs
+				noiseVectors <- noiseVector
+				rewards <- [2]float64{posSum, negSum}
+				epochs <- [2]int{posEpochs, negEpochs}
+			}(wg, worker, params)
+		} // end agents send
+		wg.Wait()
+		close(noiseVectors)
+		close(rewards)
+		close(epochs)
+
+		// Calculate mild-stati
