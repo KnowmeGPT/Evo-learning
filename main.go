@@ -192,4 +192,26 @@ func main() {
 
 		// Get the reward differences
 		rewardResults := make([]float64, len(rankedRewards))
-		for i := range rankedRe
+		for i := range rankedRewards {
+			rewardResults[i] = rankedRewards[i][0] - rankedRewards[i][1]
+		}
+
+		// Transpose the vector and the matrix
+		// (N,P) X (1,N) = [(P,N) X (N,1)]^T = (P,1) => [(P,1)]^T => (1, P)
+		noiseMatrix := anyvec64.MakeVectorData(anyvec64.MakeNumericList(contiguousNoise))
+		rewardsMatrix := anyvec64.MakeVectorData(anyvec64.MakeNumericList(rewardResults))
+
+		gradients := anyvec64.MakeVector(paramsDimensions)
+		anyvec.Gemv(
+			true, len(agents), paramsDimensions, anyvec64.MakeNumeric(1),
+			noiseMatrix, paramsDimensions, rewardsMatrix, 1, anyvec64.MakeNumeric(0),
+			gradients, 1)
+
+		// Scaled gradients
+		gradients.Scale(anyvec64.MakeNumeric(1.0 / float64(len(rankedRewards))))
+
+		// Create the parameter deltas
+		deltas := make([]anyvec.Vector, len(params))
+		for i := range params {
+			deltas[i] = params[i].Copy()
+			deltas[i].Sc
