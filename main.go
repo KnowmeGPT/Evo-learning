@@ -214,4 +214,39 @@ func main() {
 		deltas := make([]anyvec.Vector, len(params))
 		for i := range params {
 			deltas[i] = params[i].Copy()
-			deltas[i].Sc
+			deltas[i].Scale(anyvec64.MakeNumeric(l2Coefficient))
+			deltas[i].Sub(gradients)
+		}
+
+		// Update the parameters from the deltas
+		params = optimizer.Update(deltas, params)
+		if averageEpoch >= cutoffEpoch {
+			break
+		}
+	} // end episode
+
+	for i := range agents {
+		agents[i].Client.Close(agents[i].Id)
+	}
+
+	// Make final test
+	client, id, err := env.New(baseURL, environment)
+	if err != nil {
+		panic(err)
+	}
+	defer client.Close(id)
+	finalAgent := agent.New(
+		client, id, newNet(), rand.New(rand.NewSource(seeder.Int63())))
+	setNetParams(finalAgent.Net, params)
+
+	if monPath != "" {
+		err = finalAgent.Client.StartMonitor(
+			finalAgent.Id, monPath, true, false, true)
+		defer finalAgent.Client.CloseMonitor(finalAgent.Id)
+		if err != nil {
+			panic(err)
+		}
+
+		outPlotPoints := make(plotter.XYs, len(averageEpochs))
+		outPlot, err := plot.New()
+		outPlot.Title.Text = "Average Epoc
