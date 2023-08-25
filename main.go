@@ -284,4 +284,5 @@ func main() {
 
 	fmt.Println()
 	fmt.Printf(
-		"(test) MAX EPOCHS %d TOTAL EPOCHS %d AVERAGE %.2f", 
+		"(test) MAX EPOCHS %d TOTAL EPOCHS %d AVERAGE %.2f", maxE, testE, averageE)
+}
