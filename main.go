@@ -249,4 +249,39 @@ func main() {
 
 		outPlotPoints := make(plotter.XYs, len(averageEpochs))
 		outPlot, err := plot.New()
-		outPlot.Title.Text = "Average Epoc
+		outPlot.Title.Text = "Average Epochs"
+		outPlot.X.Label.Text = "Episode"
+		outPlot.Y.Label.Text = "Reward"
+
+		for i, average := range averageEpochs {
+			outPlotPoints[i].X, outPlotPoints[i].Y = float64(i), average
+		}
+
+		err = plotutil.AddLines(outPlot, "Average Epochs", outPlotPoints)
+		if err != nil {
+			panic(err)
+		}
+
+		if err = outPlot.Save(6*vg.Inch, 6*vg.Inch, path.Join(monPath, "averages.png")); err != nil {
+			panic(err)
+		}
+	}
+
+	fmt.Println()
+	// Ensure env doesn't roll over
+	p.StepLimit = 10000000000
+	testE := 0
+	maxE := -1
+	for i := 0; i < testRuns; i++ {
+		fmt.Printf("\rTEST EPISODE %d out of %d\n", i, testRuns)
+		_, epochs := p.Rollout(finalAgent, renderFinal)
+		testE += epochs
+		if epochs > maxE {
+			maxE = epochs
+		}
+	}
+	averageE := float64(testE) / float64(testRuns+1)
+
+	fmt.Println()
+	fmt.Printf(
+		"(test) MAX EPOCHS %d TOTAL EPOCHS %d AVERAGE %.2f", 
