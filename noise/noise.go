@@ -30,4 +30,8 @@ func (table *NoiseTable) Chunk(start, end int) anyvec.Vector {
 	return table.noise.Slice(start, start+end)
 }
 
-// SampleIndex returns an integer, sampled from the given source, r
+// SampleIndex returns an integer, sampled from the given source, representing
+// an index from the noise table.
+func (table *NoiseTable) SampleIndex(source *rand.Rand, dim int) int {
+	return source.Intn(table.noise.Len() - dim + 1)
+}
